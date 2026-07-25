@@ -32,13 +32,6 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
-    
-    try:
-        socket.setdefaulttimeout(3)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
-    except:
-        Log("No internet connection. Not fetching css translations")
-        return
 
     setting = util_store_read("beta_translations")
 
@@ -50,7 +43,11 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
     Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=30)) as session:
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=False, use_dns_cache=False),
+            timeout=aiohttp.ClientTimeout(total=30),
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
+        ) as session:
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
                     text = await response.text()
